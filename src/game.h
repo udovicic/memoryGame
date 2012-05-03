@@ -28,7 +28,9 @@ class game {
 private:
 // internal game logic helpers
 	// game filed [position][state/tile]
-	int flower_field[12][2];
+	int flower_field[12][2],
+		clicks;
+	unsigned int oldTime, pauseDelay;
 
 // SDL stuff
 	SDL_Surface *disp, *back, *background,

@@ -21,6 +21,8 @@
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
+#include <time.h>
+#include <iostream>
 #include "game.h"
 
 game::~game() {
@@ -34,6 +36,9 @@ game::~game() {
 
 bool game::initGame() {
 	int i;
+
+	pauseDelay = 3000; // pause 3s
+	clicks = 0; // click counter 
 
 // initial game field
 	for (i=0; i<12; i++) {
@@ -140,6 +145,20 @@ bool game::doLogic() {
 }
 
 bool game::grabInput() {
+	if (clicks == 2) {
+		oldTime = SDL_GetTicks(); // start counting ticks
+		clicks = 3;
+	} else if (clicks == 3) {
+		if (oldTime + pauseDelay > SDL_GetTicks()) // game is blocking input
+			return true;
+
+		// unpause action
+		for (int i=0; i<12; i++) if (flower_field[i][0] == 1)
+			flower_field[i][0] = 0;
+		clicks = 0;	// reset click counter
+		while (SDL_PollEvent(&ev)); // remove pending events
+	}
+
 	while (SDL_PollEvent(&ev)) {
 		switch (ev.type) {
 		case SDL_QUIT:
@@ -150,11 +169,15 @@ bool game::grabInput() {
 				return false;
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			if (ev.button.button == SDL_BUTTON_LEFT) {
+			if (ev.button.button == SDL_BUTTON_LEFT && clicks < 2) {
 				int x,y;
 				x = (int)ev.button.x/200;
 				y = (int)ev.button.y/200;
-				flower_field[x+4*y][0]=1;
+
+				if (flower_field[x+4*y][0] == 0) { // check if already clicked or opened
+					flower_field[x+4*y][0]=1;
+					clicks++;
+				}
 			}
 			break;
 		}
