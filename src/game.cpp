@@ -136,6 +136,17 @@ bool game::doLogic() {
 	bool alive;
 	int i;
 
+// check for match
+	if (clicks == 3) {
+		int a,b;
+			a = flower_field[clicked[0]][1];
+			b = flower_field[clicked[1]][1];
+		if ((a%2 == 1 && b == a - 1) || (a%2 == 0 && b == a + 1)) {
+				flower_field[clicked[0]][0] = 2;
+				flower_field[clicked[1]][0] = 2;
+				clicks = 4;
+		}
+	}
 // check win condition
 	alive = false;
 	for (i=0; i<12; i++)
@@ -148,15 +159,28 @@ bool game::grabInput() {
 	if (clicks == 2) {
 		oldTime = SDL_GetTicks(); // start counting ticks
 		clicks = 3;
-	} else if (clicks == 3) {
-		if (oldTime + pauseDelay > SDL_GetTicks()) // game is blocking input
+	} else if (clicks == 3 or clicks == 4) {
+		if (oldTime + pauseDelay > SDL_GetTicks() && clicks != 4) { // game is blocking input
+			while (SDL_PollEvent(&ev)) {  // remove pending events except quit call
+				switch (ev.type) {
+				case SDL_QUIT:
+					return false;
+					break;
+				case SDL_KEYDOWN:
+					if (ev.key.keysym.sym == SDLK_ESCAPE)
+					return false;
+					break;
+				}
+			}
 			return true;
+		}
 
 		// unpause action
-		for (int i=0; i<12; i++) if (flower_field[i][0] == 1)
-			flower_field[i][0] = 0;
+		if (flower_field[clicked[0]][0] == 1) {
+			flower_field[clicked[0]][0] = 0;
+			flower_field[clicked[1]][0] = 0;
+		}
 		clicks = 0;	// reset click counter
-		while (SDL_PollEvent(&ev)); // remove pending events
 	}
 
 	while (SDL_PollEvent(&ev)) {
@@ -176,6 +200,7 @@ bool game::grabInput() {
 
 				if (flower_field[x+4*y][0] == 0) { // check if already clicked or opened
 					flower_field[x+4*y][0]=1;
+					clicked[clicks] = x+4*y;
 					clicks++;
 				}
 			}
@@ -184,4 +209,9 @@ bool game::grabInput() {
 	}
 
 	return true;
+}
+
+void game::controlCpuUsage() {
+	SDL_Delay(100);
+	return;
 }

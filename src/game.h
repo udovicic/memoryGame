@@ -29,7 +29,7 @@ private:
 // internal game logic helpers
 	// game filed [position][state/tile]
 	int flower_field[12][2],
-		clicks;
+		clicks,clicked[2];
 	unsigned int oldTime, pauseDelay;
 
 // SDL stuff
@@ -45,6 +45,7 @@ public:
 	bool redraw(); // draw on surface and flip buffer
 	bool grabInput(); //grab input and perform click tasks; false on user quit
 	bool doLogic(); // check win condition
+	void controlCpuUsage(); // Prevent 100% CPU usage
 
 };
 
