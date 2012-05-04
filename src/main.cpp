@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
 		gm->controlCpuUsage();
 	}
 
-	cerr << "Bye!" << endl;
+	cout << "Bye!" << endl;
 	delete gm;
 
 	return 0;
