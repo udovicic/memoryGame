@@ -24,6 +24,8 @@
 
 using namespace std;
 
+void unload(game *, int);
+
 int main(int argc, char * argv[]) {
 
 	game *gm = new game();
@@ -31,16 +33,15 @@ int main(int argc, char * argv[]) {
 	cout << "memoryGame is free software: you can redistribute it and/or modify" <<
 			"it under the terms of the GNU General Public License as published by" <<
 			"the Free Software Foundation, either version 3 of the License, or" <<
-			"(at your option) any later version.\n" <<
-			"Source code available at https://github.com/udovicic\n\n";
+			"(at your option) any later version." << endl <<
+			"Source code available at https://github.com/udovicic" << endl << endl;
 
 	cout << "Initializing....";
 	if (gm->initGame()) {
 		cout << "DONE" << endl;
 	} else {
 		cout << "FAILED" << endl;
-		delete gm;
-		return 1;
+		unload(gm,1);
 	}
 
 	cout << "Loading resources...";
@@ -48,8 +49,7 @@ int main(int argc, char * argv[]) {
 		cout << "DONE" << endl;
 	} else {
 		cout << "FAILED" << endl;
-		delete gm;
-		return 1;
+		unload(gm,1);
 	}
 
 	cout << "Running game :)" << endl;
@@ -65,8 +65,11 @@ int main(int argc, char * argv[]) {
 		gm->controlCpuUsage();
 	}
 
-	cout << "Bye!" << endl;
-	delete gm;
+	unload(gm,0);
+}
 
-	return 0;
+void unload(game * gm, int status) {
+	delete gm;
+	cout << endl << "Bye!" << endl;
+	exit(status);
 }

@@ -25,6 +25,8 @@
 #include <iostream>
 #include "game.h"
 
+ using namespace std;
+
 game::~game() {
 // free all alocated surfaces
 	if (disp != NULL) SDL_FreeSurface(disp);
@@ -68,18 +70,28 @@ bool game::initGame() {
 	for (i=0; i<12; i++) tiles[i] = NULL;
 
 	disp = SDL_SetVideoMode(800,600,32,SDL_HWSURFACE | SDL_DOUBLEBUF);
-	if (disp == NULL) return false;
+	if (disp == NULL) {
+		cerr << "Game init: Unable to SetVideoMode" << endl;
+		return false;
+	}
 
 	return true;
 }
 
 bool game::loadResources() {
+	bool bLoaded = true;
 
 	background = IMG_Load("img/background.jpg");
-	if (background == NULL) return false;
+	if (background == NULL) {
+		cerr << "Load resources: Can't load background" << endl;
+		bLoaded = false;
+	}
 
 	back = IMG_Load("img/back.jpg");
-	if ( back == NULL) return false;
+	if ( back == NULL) {
+		cerr << "Load resources: Can't load back tile" << endl;
+		bLoaded = false;
+	}
 
 	tiles[0] = IMG_Load("img/a1.jpg");
 	tiles[1] = IMG_Load("img/a2.jpg");
@@ -93,9 +105,13 @@ bool game::loadResources() {
 	tiles[9] = IMG_Load("img/e2.jpg");
 	tiles[10] = IMG_Load("img/f1.jpg");
 	tiles[11] = IMG_Load("img/f2.jpg");
-	for (int i=0; i<12; i++) if (tiles[i] == NULL) return false;
+	for (int i=0; i<12; i++)
+		if (tiles[i] == NULL) {
+			cerr << "Load resources: Can't load tile " << i << endl;
+			bLoaded = false;
+		}
 
-	return true;
+	return bLoaded;
 }
 
 bool game::redraw() {
