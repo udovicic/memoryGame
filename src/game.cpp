@@ -39,8 +39,8 @@ game::~game() {
 bool game::initGame() {
 	int i;
 
-	pauseDelay = 3000; // pause 3s
-	clicks = 0; // click counter 
+	clicks = 0; // click counter
+	remaining = 6;
 
 // initial game field
 	for (i=0; i<12; i++) {
@@ -75,6 +75,9 @@ bool game::initGame() {
 		return false;
 	}
 
+	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE); // ignore mouse move event
+
+	dout << "Game started in debugging mode" << endl;
 	return true;
 }
 
@@ -145,89 +148,74 @@ bool game::redraw() {
 //finally flip buffer
 	SDL_Flip(disp);
 
+	dout << "surface blit" << endl; //debug output
+
 	return true;
 }
 
 bool game::doLogic() {
-	bool alive;
-	int i;
 
-// check for match
-	if (clicks == 3) {
+	if (clicks == 2) { // check for match
 		int a,b;
 			a = flower_field[clicked[0]][1];
 			b = flower_field[clicked[1]][1];
-		if ((a%2 == 1 && b == a - 1) || (a%2 == 0 && b == a + 1)) {
+		if ((a%2 == 1 && b == a - 1) || (a%2 == 0 && b == a + 1)) { // match!
 				flower_field[clicked[0]][0] = 2;
 				flower_field[clicked[1]][0] = 2;
-				clicks = 4;
-		}
-	}
-// check win condition
-	alive = false;
-	for (i=0; i<12; i++)
-		if (flower_field[i][0] != 2) alive = true;
-
-	return alive;
-}
-
-bool game::grabInput() {
-	if (clicks == 2) {
-		oldTime = SDL_GetTicks(); // start counting ticks
-		clicks = 3;
-	} else if (clicks == 3 or clicks == 4) {
-		if (oldTime + pauseDelay > SDL_GetTicks() && clicks != 4) { // game is blocking input
-			while (SDL_PollEvent(&ev)) {  // remove pending events except quit call
-				switch (ev.type) {
-				case SDL_QUIT:
-					return false;
-					break;
-				case SDL_KEYDOWN:
-					if (ev.key.keysym.sym == SDLK_ESCAPE)
-					return false;
-					break;
+				if (!--remaining) {
+					dout << "Last one" << endl;
+					remaining=-1;
 				}
-			}
-			return true;
+				clicks++; // no need for waiting
 		}
-
-		// unpause action
-		if (flower_field[clicked[0]][0] == 1) {
+	} else if (clicks == 3) { // flip tiles if needed
+		if (flower_field[clicked[0]][0] != 2) {
 			flower_field[clicked[0]][0] = 0;
 			flower_field[clicked[1]][0] = 0;
 		}
-		clicks = 0;	// reset click counter
+
+		if (remaining!=-1)
+			clicks = 0; //reset click counter
+	} else if (clicks == 4) { //last click in game
+		remaining = 0;
 	}
 
-	while (SDL_PollEvent(&ev)) {
-		switch (ev.type) {
-		case SDL_QUIT:
+
+	return (bool)remaining;
+} 
+
+bool game::grabInput() {
+	SDL_WaitEvent(&ev);
+	switch (ev.type) {
+	case SDL_QUIT:	// system reqested quit
+		return false;
+		break;
+	case SDL_KEYDOWN: // ESC key pressed
+		if (ev.key.keysym.sym == SDLK_ESCAPE)
 			return false;
-			break;
-		case SDL_KEYDOWN:
-			if (ev.key.keysym.sym == SDLK_ESCAPE)
-				return false;
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			if (ev.button.button == SDL_BUTTON_LEFT && clicks < 2) {
+		break;
+	case SDL_MOUSEBUTTONDOWN: // Mouse click
+		if (ev.button.button == SDL_BUTTON_LEFT) {
+
+			if (clicks < 2) { // field is clickable, mark clicked tile in array
 				int x,y;
 				x = (int)ev.button.x/200;
 				y = (int)ev.button.y/200;
 
 				if (flower_field[x+4*y][0] == 0) { // check if already clicked or opened
+
+					dout << x << "," << y << " oppened" << endl; //debug output
 					flower_field[x+4*y][0]=1;
 					clicked[clicks] = x+4*y;
 					clicks++;
 				}
+			} else { // clicked to hide oppened tiles
+				clicks++;
 			}
-			break;
+
+			dout << "clicks: " << clicks << endl; //debug output
 		}
+		break;
 	}
-
 	return true;
-}
-
-void game::controlCpuUsage() {
-	SDL_Delay(100);
-	return;
 }

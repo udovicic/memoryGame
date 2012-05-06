@@ -21,6 +21,13 @@
 #ifndef H_GAME
 #define H_GAME
 
+
+#ifdef DEBUG
+#define dout cout << "DEBUG: "
+#else
+#define dout 0 && cout
+#endif
+
 #include "SDL/SDL.h"
 
 class game {
@@ -29,8 +36,8 @@ private:
 // internal game logic helpers
 	// game filed [position][state/tile]
 	int flower_field[12][2],
-		clicks,clicked[2];
-	unsigned int oldTime, pauseDelay;
+		clicks,clicked[2], // used for mouse clicks
+		remaining;
 
 // SDL stuff
 	SDL_Surface *disp, *back, *background,
@@ -45,8 +52,6 @@ public:
 	bool redraw(); // draw on surface and flip buffer
 	bool grabInput(); //grab input and perform click tasks; false on user quit
 	bool doLogic(); // check win condition
-	void controlCpuUsage(); // Prevent 100% CPU usage
-
 };
 
 #endif

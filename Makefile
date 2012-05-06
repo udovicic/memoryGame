@@ -4,9 +4,14 @@ OBJS = main.o game.o
 TRGT = memoryGame
 
 CC = g++
-CFLAGS = -g -pedantic -Wall `sdl-config --cflags`
+CFLAGS = -pedantic -Wall `sdl-config --cflags` -O2
 LFLAGS = -o $(TRGT) -lSDL_image -lSDL
 
+all: $(TRGT)
+
+debug: CFLAGS += -DDEBUG -g
+debug: $(TRGT)
+	
 $(TRGT): $(OBJS)
 	$(CC) $(OBJS) $(LFLAGS)
 

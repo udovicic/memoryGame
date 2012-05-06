@@ -62,7 +62,6 @@ int main(int argc, char * argv[]) {
 		if (!gm->grabInput()) {
 			break;
 		}
-		gm->controlCpuUsage();
 	}
 
 	unload(gm,0);
