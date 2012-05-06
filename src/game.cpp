@@ -76,6 +76,7 @@ bool game::initGame() {
 	}
 
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE); // ignore mouse move event
+	SDL_EventState(SDL_APPMOUSEFOCUS, SDL_IGNORE); // ignore mouse focus event
 
 	dout << "Game started in debugging mode" << endl;
 	return true;
