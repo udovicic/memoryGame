@@ -34,6 +34,7 @@ game::~game() {
 	if (background != NULL) SDL_FreeSurface(background);
 	for (int i=0; i<12; i++)
 		if (tiles[i] != NULL) SDL_FreeSurface(tiles[i]);
+	SDL_Quit();
 }
 
 bool game::initGame() {
@@ -68,6 +69,8 @@ bool game::initGame() {
 	back = NULL;
 	background = NULL;
 	for (i=0; i<12; i++) tiles[i] = NULL;
+
+	SDL_Init(SDL_INIT_EVERYTHING);
 
 	disp = SDL_SetVideoMode(800,600,32,SDL_HWSURFACE | SDL_DOUBLEBUF);
 	if (disp == NULL) {
